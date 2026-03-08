@@ -163,6 +163,13 @@ export default function App() {
 
               {/* Right side - Alert + Notifications */}
               <div className="flex items-center gap-3">
+
+              {/* Move to Teacher Dashboard */}
+              <div>
+              <button style={{cursor:'pointer',backgroundColor:"black",color:"white"}} onClick={()=>{
+                   window.location.href="https://teacher-dashboard-frontend.vercel.app/"
+              }}>Next Dashboard</button>
+            </div>
                 {/* Counselling Alert Badge */}
                 <div className="flex items-center gap-2 bg-red-50 border-2 border-red-500 rounded-lg px-3 py-2">
                   <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
