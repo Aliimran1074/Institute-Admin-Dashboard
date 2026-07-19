@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import axios from "axios";
+import {useEffect,useState} from "react";
 import { 
   Search, 
   Filter, 
@@ -14,121 +15,95 @@ import {
 export default function MasterContentLibrary({ selectedSession }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [contentLibrary,setContentLibrary]=useState([]);
+const [loading,setLoading]=useState(true);
 
-  // Mock content library data
-  const contentLibrary = [
-    {
-      id: 1,
-      courseCode: 'CS-301',
-      courseTitle: 'Data Structures and Algorithms',
-      teacher: 'Dr. Sarah Mitchell',
-      contentType: 'Lecture Notes',
-      uploadDate: '2025-02-01',
-      lifecycleStatus: 'Live',
-      aiProcessingTime: '2 min 15 sec',
-      studentAccess: 245,
-      lastUpdated: '2025-02-02'
-    },
-    {
-      id: 2,
-      courseCode: 'PHY-201',
-      courseTitle: 'Quantum Mechanics',
-      teacher: 'Prof. James Chen',
-      contentType: 'Quiz Module',
-      uploadDate: '2025-02-02',
-      lifecycleStatus: 'Processing by AI',
-      aiProcessingTime: 'In progress',
-      studentAccess: 0,
-      lastUpdated: '2025-02-03'
-    },
-    {
-      id: 3,
-      courseCode: 'CHEM-150',
-      courseTitle: 'Organic Chemistry',
-      teacher: 'Dr. Emily Roberts',
-      contentType: 'Lab Assignment',
-      uploadDate: '2025-01-28',
-      lifecycleStatus: 'Live',
-      aiProcessingTime: '1 min 45 sec',
-      studentAccess: 198,
-      lastUpdated: '2025-01-30'
-    },
-    {
-      id: 4,
-      courseCode: 'MATH-202',
-      courseTitle: 'Advanced Calculus',
-      teacher: 'Prof. Michael Brown',
-      contentType: 'Exam',
-      uploadDate: '2025-02-03',
-      lifecycleStatus: 'Live',
-      aiProcessingTime: '3 min 10 sec',
-      studentAccess: 312,
-      lastUpdated: '2025-02-03'
-    },
-    {
-      id: 5,
-      courseCode: 'ENG-101',
-      courseTitle: 'English Literature',
-      teacher: 'Dr. Lisa Anderson',
-      contentType: 'Study Guide',
-      uploadDate: '2025-01-30',
-      lifecycleStatus: 'Draft',
-      aiProcessingTime: 'Not started',
-      studentAccess: 0,
-      lastUpdated: '2025-01-30'
-    },
-    {
-      id: 6,
-      courseCode: 'CS-401',
-      courseTitle: 'Machine Learning',
-      teacher: 'Prof. David Lee',
-      contentType: 'Project Brief',
-      uploadDate: '2025-02-01',
-      lifecycleStatus: 'Processing by AI',
-      aiProcessingTime: 'In progress',
-      studentAccess: 0,
-      lastUpdated: '2025-02-02'
-    },
-    {
-      id: 7,
-      courseCode: 'BIO-250',
-      courseTitle: 'Cell Biology',
-      teacher: 'Dr. Rachel Green',
-      contentType: 'Video Lecture',
-      uploadDate: '2025-01-29',
-      lifecycleStatus: 'Live',
-      aiProcessingTime: '5 min 30 sec',
-      studentAccess: 276,
-      lastUpdated: '2025-01-31'
-    },
-    {
-      id: 8,
-      courseCode: 'STAT-301',
-      courseTitle: 'Probability Theory',
-      teacher: 'Prof. Thomas White',
-      contentType: 'Quiz',
-      uploadDate: '2025-02-02',
-      lifecycleStatus: 'Live',
-      aiProcessingTime: '2 min 05 sec',
-      studentAccess: 189,
-      lastUpdated: '2025-02-03'
-    }
-  ];
+
+const instituteId =
+"6a02e3cf54202521c3af340e";
+
+useEffect(()=>{
+
+
+const getContent=async()=>{
+
+
+try{
+
+
+const response =
+await axios.get(
+`https://univeristy-management-system.vercel.app/api/masterContent/${instituteId}`
+);
+
+
+console.log(
+"Master Content:",
+response.data
+);
+
+
+setContentLibrary(
+ response.data.data
+);
+
+console.log("Content Array:", response.data.data);
+
+response.data.data.forEach((item,index)=>{
+  if(!item.courseTitle || !item.courseCode || !item.teacher){
+    console.log("Missing Field at index:", index, item);
+  }
+});
+
+}
+catch(error){
+
+console.log(
+"Content Error",
+error
+);
+
+
+}
+finally{
+
+setLoading(false);
+
+}
+
+
+}
+
+
+getContent();
+
+
+},[]);
 
   // Filter content based on search and status
-  const filteredContent = contentLibrary.filter(item => {
-    const matchesSearch = 
-      item.courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.teacher.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || item.lifecycleStatus === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+
+  console.log("State Content Library:", contentLibrary);
+ 
+ const filteredContent = contentLibrary.filter(item => {
+
+  const courseTitle = item.courseTitle || "";
+  const courseCode = item.courseCode || "";
+  const teacher = item.teacher || "";
+
+  const matchesSearch =
+    courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    teacher.toLowerCase().includes(searchQuery.toLowerCase());
+
+  const matchesStatus =
+    statusFilter === "all" ||
+    item.lifecycleStatus === statusFilter;
+
+  return matchesSearch && matchesStatus; 
+});
 
   // Get status badge styling
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status) => {   
     switch(status) {
       case 'Live':
         return {
@@ -169,6 +144,11 @@ export default function MasterContentLibrary({ selectedSession }) {
     draft: contentLibrary.filter(c => c.lifecycleStatus === 'Draft').length
   };
 
+  if(loading){
+
+return <h1>Loading Content...</h1>
+
+}
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -264,15 +244,7 @@ export default function MasterContentLibrary({ selectedSession }) {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
                   Lifecycle Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                  AI Processing
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                  Student Access
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                  Last Updated
-                </th>
+            
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -280,7 +252,7 @@ export default function MasterContentLibrary({ selectedSession }) {
                 const statusBadge = getStatusBadge(item.lifecycleStatus);
                 
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{item.courseTitle}</p>
@@ -299,15 +271,7 @@ export default function MasterContentLibrary({ selectedSession }) {
                         <span className="text-xs font-medium">{item.lifecycleStatus}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-900">{item.aiProcessingTime}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-gray-900">{item.studentAccess}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">{item.lastUpdated}</p>
-                    </td>
+             
                   </tr>
                 );
               })}
