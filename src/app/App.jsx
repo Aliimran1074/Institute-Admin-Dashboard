@@ -56,7 +56,7 @@ export default function App() {
 
 
         const response = await axios.get(
-          `https://univeristy-management-system.vercel.app/instituteDashboard/${instituteId}`
+          `https://univeristy-management-system.vercel.app/api/instituteDashboard/${instituteId}`
         );
         console.log(
           "Institute Dashboard Data",
